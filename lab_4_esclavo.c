@@ -1,6 +1,6 @@
 /*
  * File:   main_lab4_esclavo.c
- * Author: Arevalo
+ * Author: Israel Arevalo
  *
  * Created on 20 de febrero de 2020, 01:03 AM
  */
@@ -36,7 +36,6 @@
 
 #define _XTAL_FREQ 4000000
 
-//uint8_t cont = 0;
 char pot1 = 0;
 char pot2 = 0;
 uint8_t ban = 1;
@@ -55,17 +54,21 @@ void __interrupt() inter (void){
         }
         PIR1bits.SSPIF = 0;
     }
+    //Interrupción de finalización de ADC
     if (PIR1bits.ADIF == 1){
+        //Sentencia para leer el ADC del potenciómetro 1
         if (ban==1){
             pot2 = ADRESH;
             ban = 2;
             adc_conf(0b00000000, 0b01110001);
         }
+        //Sentencia para leer el ADC del potenciómetro 2
         else if (ban==2){
             pot1 = ADRESH;
             ban = 1;
             adc_conf(0b00000000, 0b01100001);
         }
+        //Se vuelve a iniciar la conversión ADC
         PIR1bits.ADIF = 0;
         __delay_ms(5);
         iniciar_adc();
@@ -73,17 +76,20 @@ void __interrupt() inter (void){
 }
 
 void main(void) {
+    //Configuración inicial del programa
     init();
     inter_init();
     spi_conf(2);
     iniciar_adc();
     spi_escribir(0x00);
+    //Ciclo para esperar a que se cumpla alguna interrupción
     while (1){
         
     }
     //return;
 }
 
+//Inicialización de las interrupciones
 void inter_init (void)
 {
     INTCONbits.GIE = 1;
@@ -94,6 +100,7 @@ void inter_init (void)
     PIE1bits.SSPIE = 1;
 }
 
+//Inicialización de puertos
 void init (void)
 {
     ANSEL = 0x00;
